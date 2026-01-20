@@ -26,7 +26,7 @@ A production-ready fintech platform that mirrors live RoboForex trading account 
 
 ```bash
 # Clone repository
-git clone <your-repo-url>
+git clone https://github.com/KALIM92786/IRCAMONEY.git
 cd IRCAMONEY
 
 # Backend setup
