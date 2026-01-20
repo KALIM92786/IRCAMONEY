@@ -94,7 +94,7 @@ class SyncEngine {
     // In production, you might want to handle deletions/closures more robustly
     for (const order of orders) {
       const query = `
-        INSERT INTO orders (id, account_id, ticker, side, volume, open_price, current_price, profit, open_time)
+        INSERT INTO orders (id, account_id, symbol, side, volume, open_price, current_price, profit, open_time)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         ON CONFLICT (id) DO UPDATE SET
           current_price = EXCLUDED.current_price,
@@ -119,7 +119,7 @@ class SyncEngine {
   async updateDeals(deals) {
     for (const deal of deals) {
       const query = `
-        INSERT INTO deals (id, order_id, account_id, ticker, side, volume, price, profit, close_time)
+        INSERT INTO deals (id, order_id, account_id, symbol, side, volume, price, profit, close_time)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
         ON CONFLICT (id) DO NOTHING
       `;

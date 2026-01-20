@@ -53,6 +53,11 @@ async function checkDb() {
       console.log('   👉 If the app is running, check Render logs for Sync Engine errors.');
     }
 
+    // 5. Check Equity Snapshots
+    const snapshots = await client.query('SELECT * FROM equity_snapshots ORDER BY timestamp DESC LIMIT 5');
+    console.log('\n📈 Equity Snapshots:', snapshots.rows.length);
+    if(snapshots.rows.length > 0) console.table(snapshots.rows);
+
     client.release();
   } catch (err) {
     console.error('❌ Error:', err);

@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS equity_snapshots (
     account_id VARCHAR(50) REFERENCES accounts(id),
     equity DECIMAL(15, 2) NOT NULL,
     balance DECIMAL(15, 2) NOT NULL,
+    margin DECIMAL(15, 2) DEFAULT 0,
     timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

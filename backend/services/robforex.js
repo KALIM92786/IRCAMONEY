@@ -44,7 +44,18 @@ class RoboForexService {
     try {
       const response = await this.api.get(`/api/v1/accounts/${accountId}/orders`);
       if (response.data && Array.isArray(response.data.data)) {
-        return response.data.data;
+        return response.data.data.map(order => ({
+          id: order.id,
+          symbol: order.ticker || order.symbol,
+          side: order.side,
+          volume: order.volume,
+          openPrice: order.open_price || order.openPrice,
+          currentPrice: order.current_price || order.currentPrice || order.price,
+          sl: order.sl,
+          tp: order.tp,
+          profit: order.profit,
+          openTime: order.open_time || order.openTime
+        }));
       }
       return [];
     } catch (error) {
@@ -58,7 +69,17 @@ class RoboForexService {
       // Fetch last 50 deals or time-based
       const response = await this.api.get(`/api/v1/accounts/${accountId}/deals?limit=50`);
       if (response.data && Array.isArray(response.data.data)) {
-        return response.data.data;
+        return response.data.data.map(deal => ({
+          id: deal.id,
+          orderId: deal.order_id || deal.orderId,
+          symbol: deal.ticker || deal.symbol,
+          side: deal.side,
+          volume: deal.volume,
+          price: deal.price,
+          profit: deal.profit,
+          commission: deal.commission,
+          closeTime: deal.close_time || deal.closeTime
+        }));
       }
       return [];
     } catch (error) {
@@ -70,8 +91,15 @@ class RoboForexService {
   async getQuote(ticker = 'XAUUSD', accountId = this.accountId) {
     try {
       const response = await this.api.get(`/api/v1/accounts/${accountId}/instruments/${ticker}/quote`);
-      if (response.data && response.data.data) {
-        return response.data.data;
+      const data = response.data && response.data.data;
+      if (data) {
+        return {
+          symbol: ticker,
+          bid: data.bid,
+          ask: data.ask,
+          spread: data.spread,
+          timestamp: data.last_time || new Date()
+        };
       }
       return null;
     } catch (error) {
