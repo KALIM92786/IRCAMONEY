@@ -48,9 +48,9 @@ class RoboForexService {
     }
   }
 
-  async getQuote(ticker = 'XAUUSD') {
+  async getQuote(ticker = 'XAUUSD', accountId = this.accountId) {
     try {
-      const response = await this.api.get(`/api/v1/quotes/${ticker}`);
+      const response = await this.api.get(`/api/v1/accounts/${accountId}/instruments/${ticker}/quote`);
       return response.data;
     } catch (error) {
       console.error(`RoboForex API Error (Quote ${ticker}):`, error.message);
@@ -58,17 +58,17 @@ class RoboForexService {
     }
   }
 
-  async placeOrder(accountId, symbol, side, volume, type = 'market') {
+  async placeOrder(accountId, ticker, side, volume, type = 'market') {
     try {
       const response = await this.api.post(`/api/v1/accounts/${accountId}/orders`, {
-        symbol,
+        ticker,
         side,
         volume,
         type
       });
       return response.data;
     } catch (error) {
-      console.error(`RoboForex API Error (Place Order ${symbol}):`, error.message);
+      console.error(`RoboForex API Error (Place Order ${ticker}):`, error.message);
       return null;
     }
   }

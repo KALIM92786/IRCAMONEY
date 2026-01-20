@@ -1,0 +1,935 @@
+StocksTrader REST API
+ 0.12.1 beta 
+OAS 3.0
+Guide to StocksTrader API error codes
+
+Servers
+
+https://api.stockstrader.com/ - Trading server
+
+Authorize
+Authorization
+
+
+POST
+/api/v1/logout
+Logout
+
+
+Terminate the user session (or perform the logout flow).
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok"
+}
+No links
+401	
+Unauthorized
+
+No links
+Instruments
+
+
+GET
+/api/v1/instruments
+Instruments common info
+
+Get a list of all trading instruments available in StocksTrader in general (excluding the rules and restrictions for a specific trading account). Method will be depricated on 01.12.2025. Please use /api/v1/accounts/{account_id}/instruments instead.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": [
+    {
+      "ticker": "EURUSD",
+      "description": "EUR/USD",
+      "contract_size": 1,
+      "units": "Share(s)"
+    }
+  ]
+}
+No links
+
+GET
+/api/v1/accounts/{account_id}/instruments
+Get a list of instruments with full details for a specific account
+
+
+Get a list of all trading instruments available in StocksTrader in general (including the rules and restrictions for a specific trading account).
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": [
+    {
+      "ticker": "EURUSD",
+      "description": "EUR/USD",
+      "contract_size": 1,
+      "units": "Share(s)",
+      "min_volume": 1,
+      "max_volume": 100000000,
+      "volume_step": 0.01,
+      "min_tick": 0.00001,
+      "leverage": 0.05,
+      "trade_mode": "full"
+    }
+  ]
+}
+No links
+
+GET
+/api/v1/accounts/{account_id}/instruments/{ticker}
+Get instrument trading info
+
+
+Get trading conditions of trading instrument (including availability) for a specific account. Need to be used before placing an order for a particular trading instrument, not for all trading instruments. Method will be depricated on 01.12.2025. Please use /api/v1/accounts/{account_id}/instruments instead.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+ticker *
+string
+(path)
+Instrument identifier.
+
+ticker
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": {
+    "min_volume": 1,
+    "max_volume": 100000000,
+    "volume_step": 0.01,
+    "min_tick": 0.00001,
+    "leverage": 0.05,
+    "trade_mode": "full"
+  }
+}
+No links
+401	
+Unauthorized
+
+No links
+Quotes
+
+
+GET
+/api/v1/accounts/{account_id}/instruments/{ticker}/quote
+Get quotes data
+
+
+Get the latest ask/bid/last quotes for an instrument.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+ticker *
+string
+(path)
+Instrument identifier.
+
+ticker
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": {
+    "ask_price": 100.75,
+    "bid_price": 100.25,
+    "ask_bid_price_time": 1742386254,
+    "last_price": 100.5,
+    "last_price_time": 1742386254
+  }
+}
+No links
+401	
+Unauthorized
+
+No links
+Account
+
+
+GET
+/api/v1/accounts
+Accounts
+
+
+Get a list of user accounts.
+
+Parameters
+Try it out
+No parameters
+
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": [
+    {
+      "id": "93012898",
+      "name": "My Demo-Hedg account",
+      "type": "demo",
+      "system": "netting",
+      "currency": "USD",
+      "status": "enabled"
+    }
+  ]
+}
+No links
+401	
+Unauthorized
+
+No links
+
+GET
+/api/v1/accounts/{account_id}
+Account State
+
+
+Get account information.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": {
+    "cash": {
+      "my_portfolio": 12300,
+      "investments": 1512.32,
+      "available_to_invest": 32000
+    },
+    "margin": {
+      "balance": 0,
+      "unrealized_pl": -1512.32,
+      "equity": 32000,
+      "margin": -8300.68,
+      "free_margin": -145278.98
+    }
+  }
+}
+No links
+401	
+Unauthorized
+
+No links
+
+GET
+/api/v1/accounts/{account_id}/orders
+Orders
+
+
+Get a list of orders or perform searches through order history if optional parameters are specified.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+status
+string
+(query)
+Type of orders.
+
+Available values : filled, rejected, canceled, active, in_execution
+
+
+--
+history_from
+number
+(query)
+Unix timestamp (UTC) of left boundary of the search.
+
+history_from
+history_to
+number
+(query)
+Unix timestamp (UTC) of right boundary of the search.
+
+history_to
+skip
+number
+(query)
+Defines the number of elements to skip from the beginning of the original dataset (used for data pagination). Default 0. For example, if skip = 100, the first 100 elements will be skipped, and the selection will start from the 101st element.
+
+skip
+limit
+number
+(query)
+Defines the maximum number of elements to be included in the response (used for data pagination). Default 100. Limited from above by the value 500. For example, if limit = 200, the response will return a maximum of 200 elements. Or for example (combined), if skip =100 and limit=200, the response will return a list of 200 orders, starting from the 101st to the 300th order.
+
+limit
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": [
+    {
+      "id": "002212096",
+      "ticker": "AAPL",
+      "volume": 13,
+      "side": "buy",
+      "type": "limit",
+      "filled_price": 137.82,
+      "price": 137.84,
+      "expiration": 1705888778,
+      "last_modified": 1704879978,
+      "comment": "string",
+      "create_time": 1704276610,
+      "deals": [
+        "001389"
+      ],
+      "status": "filled"
+    }
+  ]
+}
+No links
+401	
+Unauthorized
+
+No links
+
+GET
+/api/v1/accounts/{account_id}/deals
+Deals
+
+
+Get a list of deals or deals history if optional parameters are specified.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+history_from
+number
+(query)
+Unix timestamp (UTC) of left boundary of the search.
+
+history_from
+history_to
+number
+(query)
+Unix timestamp (UTC) of right boundary of the search.
+
+history_to
+skip
+number
+(query)
+Defines the number of elements to skip from the beginning of the original dataset (used for data pagination). Default 0. For example, if skip = 100, the first 100 elements will be skipped, and the selection will start from the 101st element.
+
+skip
+limit
+number
+(query)
+Defines the maximum number of elements to be included in the response (used for data pagination). Default 100. Limited from above by the value 500. For example, if limit = 200, the response will return a maximum of 200 elements. Or for example (combined), if skip =100 and limit=200, the response will return a list of 200 orders, starting from the 101st to the 300th order.
+
+limit
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": [
+    {
+      "id": "001389",
+      "ticker": "TSLA",
+      "volume": 1,
+      "side": "buy",
+      "open_price": 142.13,
+      "open_time": 1704880553,
+      "profit": 19.47,
+      "close_price": 142.13,
+      "close_time": 1704880553,
+      "status": "closed"
+    }
+  ]
+}
+No links
+401	
+Unauthorized
+
+No links
+Trading
+
+
+POST
+/api/v1/accounts/{account_id}/orders
+Place Order
+
+
+Place a new order (Market, Limit, Stop).
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+Request body
+
+application/x-www-form-urlencoded
+ticker *
+string
+Ticker.
+
+side *
+string
+Side.
+
+type *
+string
+Type.
+
+volume *
+number
+The number of units.
+
+price
+number
+Limit Price for Limit or Stop Price for Stop.
+
+expiration
+number
+Unix timestamp (UTC) in seconds. 0 value means gtc (good till cancel).
+
+stop_loss
+number
+Stop Loss price.
+
+take_profit
+number
+Take Profit price.
+
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok",
+  "data": {
+    "order_id": "001518"
+  }
+}
+No links
+401	
+Unauthorized
+
+No links
+
+PUT
+/api/v1/accounts/{account_id}/orders/{order_id}
+Modify Order
+
+
+Modify Limit or Stop order parameters.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+order_id *
+string
+(path)
+Order identifier.
+
+order_id
+Request body
+
+application/x-www-form-urlencoded
+volume
+number
+The number of units.
+
+price
+number
+Limit Price for Limit or Stop Price for Stop.
+
+expiration
+number
+Unix timestamp (UTC) in seconds. 0 value means gtc (good till cancel).
+
+stop_loss
+number
+Stop Loss price.
+
+take_profit
+number
+Take Profit price.
+
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok"
+}
+No links
+401	
+Unauthorized
+
+No links
+
+DELETE
+/api/v1/accounts/{account_id}/orders/{order_id}
+Cancel Order
+
+
+Delete unfulfilled Limit or Stop order.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+order_id *
+string
+(path)
+Order identifier.
+
+order_id
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok"
+}
+No links
+401	
+Unauthorized
+
+No links
+
+PUT
+/api/v1/accounts/{account_id}/deals/{deal_id}
+Modify Deal
+
+
+Set Stop Loss/Take Profit order for an open deal or edit them.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+deal_id *
+string
+(path)
+Deal identifier.
+
+deal_id
+Request body
+
+application/x-www-form-urlencoded
+stop_loss
+number
+Stop Loss price.
+
+take_profit
+number
+Take Profit price.
+
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok"
+}
+No links
+401	
+Unauthorized
+
+No links
+
+DELETE
+/api/v1/accounts/{account_id}/deals/{deal_id}
+Close Deal
+
+
+Close an open deal.
+
+Parameters
+Try it out
+Name	Description
+account_id *
+string
+(path)
+Account identifier.
+
+account_id
+deal_id *
+string
+(path)
+Deal identifier.
+
+deal_id
+Responses
+Code	Description	Links
+200	
+response
+
+Media type
+
+application/json
+Controls Accept header.
+Example Value
+Schema
+{
+  "code": "ok"
+}
+No links
+401	
+Unauthorized
+
+No links
+
+Schemas
+Account{
+id*	[...]
+name*	[...]
+type*	[...]
+system*	[...]
+currency*	[...]
+status*	[...]
+}
+AccountResponse{
+code*	CodeOk[...]
+data*	[...]
+}
+AccountMarginState{
+balance*	[...]
+unrealized_pl*	[...]
+equity*	[...]
+margin*	[...]
+free_margin*	[...]
+}
+AccountCashState{
+my_portfolio*	[...]
+investments*	[...]
+available_to_invest*	[...]
+}
+AccountState{
+cash	AccountCashState{...}
+margin	AccountMarginState{...}
+}
+AccountStateResponse{
+code*	CodeOk[...]
+data*	AccountState{...}
+}
+ErrorResponse{
+code*	[...]
+msg*	[...]
+}
+InstrumentShort{
+ticker*	[...]
+description*	[...]
+contract_size*	[...]
+units*	[...]
+}
+InstrumentDataForAccount{
+ticker*	[...]
+description*	[...]
+contract_size*	[...]
+units*	[...]
+min_volume*	[...]
+max_volume*	[...]
+volume_step*	[...]
+min_tick*	[...]
+leverage*	[...]
+trade_mode*	[...]
+}
+Instrument{
+min_volume*	[...]
+max_volume*	[...]
+volume_step*	[...]
+min_tick*	[...]
+leverage*	[...]
+trade_mode*	[...]
+}
+InstrumentsResponse{
+code*	CodeOk[...]
+data*	[...]
+}
+InstrumentResponse{
+code*	CodeOk[...]
+data*	Instrument{...}
+}
+InstrumentDataForAccountResponse{
+code*	CodeOk[...]
+data*	[...]
+}
+CodeOkstring
+title: CodeOk
+example: ok
+Code will always be ok.
+
+Enum:
+Array [ 1 ]
+Order{
+id*	[...]
+ticker*	[...]
+volume*	[...]
+side*	[...]
+type*	[...]
+filled_price	[...]
+price	[...]
+expiration	[...]
+last_modified	[...]
+comment	[...]
+create_time	[...]
+deals*	[...]
+status*	[...]
+}
+OrderCommon{
+id*	[...]
+ticker*	[...]
+volume*	[...]
+side*	[...]
+type*	[...]
+filled_price	[...]
+price	[...]
+expiration	[...]
+last_modified	[...]
+comment	[...]
+create_time	[...]
+deals*	[...]
+}
+QuoteDataResponse{
+code*	CodeOk[...]
+data*	{...}
+}
+OrdersResponse{
+code*	CodeOk[...]
+data*	[...]
+}
+OrderStatus{
+status*	[...]
+}
+DealStatus{
+status*	[...]
+}
+PlaceModifyOrderCommon{
+volume	[...]
+price	[...]
+expiration	[...]
+stop_loss	[...]
+take_profit	[...]
+}
+PlaceOrderCommon{
+ticker	[...]
+side	[...]
+type	[...]
+}
+DealCommon{
+id*	[...]
+ticker*	[...]
+volume*	[...]
+side*	[...]
+open_price*	[...]
+open_time*	[...]
+profit*	[...]
+close_price	[...]
+close_time	[...]
+}
+Deal{
+id*	[...]
+ticker*	[...]
+volume*	[...]
+side*	[...]
+open_price*	[...]
+open_time*	[...]
+profit*	[...]
+close_price	[...]
+close_time	[...]
+status*	[...]
+}
+DealsResponse{
+code*	CodeOk[...]
+data*	[...]
+}
+ModifyDealRequestBody{
+stop_loss	[...]
+take_profit	[...]
+}
+PostOrderResponse{
+code*	CodeOk[...]
+data*	{...}
+}
+SuccessResponse{
+code*	[...]
+}

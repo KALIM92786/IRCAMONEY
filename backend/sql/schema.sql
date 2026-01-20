@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Accounts Table
 CREATE TABLE IF NOT EXISTS accounts (
-    id VARCHAR(50) PRIMARY KEY, -- RoboForex Account ID
+    id VARCHAR(50) PRIMARY KEY DEFAULT CAST(uuid_generate_v4() AS VARCHAR), -- RoboForex Account ID
     user_id UUID REFERENCES users(id),
     balance DECIMAL(15, 2) NOT NULL DEFAULT 0,
     equity DECIMAL(15, 2) NOT NULL DEFAULT 0,
@@ -104,3 +104,29 @@ CREATE TABLE IF NOT EXISTS system_settings (
     value TEXT,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Quotes Table (Live Prices)
+CREATE TABLE IF NOT EXISTS quotes (
+    symbol VARCHAR(20) PRIMARY KEY,
+    bid DECIMAL(15, 5) NOT NULL,
+    ask DECIMAL(15, 5) NOT NULL,
+    spread DECIMAL(10, 1),
+    timestamp TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Trigger to prevent NULL ID crashes
+CREATE OR REPLACE FUNCTION set_default_account_id()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.id IS NULL THEN
+        NEW.id := CAST(uuid_generate_v4() AS VARCHAR);
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS ensure_account_id ON accounts;
+CREATE TRIGGER ensure_account_id
+BEFORE INSERT ON accounts
+FOR EACH ROW
+EXECUTE FUNCTION set_default_account_id();

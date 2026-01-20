@@ -1,7 +1,15 @@
 const { Pool } = require('pg');
 const fs = require('fs');
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+
+const envPath = path.resolve(__dirname, '../../.env');
+const dotenvResult = require('dotenv').config({ path: envPath });
+
+if (dotenvResult.error) {
+  console.log(`⚠️  .env file not found at: ${envPath}`);
+} else {
+  console.log(`📄 Loaded .env from: ${envPath}`);
+}
 
 const connectionString = process.argv[2] || process.env.DATABASE_URL;
 
@@ -18,8 +26,14 @@ const pool = new Pool({
 async function resetDatabase() {
   try {
     console.log('⚠️  WARNING: This will wipe the target database.');
-    const host = connectionString.includes('@') ? connectionString.split('@')[1] : 'unknown host';
-    console.log('Target:', host); // Log host only for safety
+    let host = 'unknown host';
+    try {
+      const url = new URL(connectionString);
+      host = url.hostname;
+    } catch (e) {
+      host = connectionString.includes('@') ? connectionString.split('@')[1] : 'unknown host';
+    }
+    console.log('Target Host:', host);
 
     // 1. Drop and Recreate Schema
     console.log('🗑️  Dropping public schema...');
@@ -43,8 +57,12 @@ async function resetDatabase() {
         const sql = fs.readFileSync(filePath, 'utf8');
         await pool.query(sql);
       } else {
-        console.error(`❌ FATAL: Schema file not found: ${file}. Halting.`);
-        throw new Error(`Schema file not found: ${file}`);
+        if (file === 'schema.sql') {
+          console.error(`❌ FATAL: Core schema file not found: ${file}. Halting.`);
+          throw new Error(`Schema file not found: ${file}`);
+        } else {
+          console.warn(`⚠️  Warning: Optional schema file not found: ${file}. Skipping.`);
+        }
       }
     }
 
