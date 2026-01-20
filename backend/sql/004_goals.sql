@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS goals (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  title VARCHAR(100) NOT NULL,
+  target_amount DECIMAL(15, 2) NOT NULL,
+  current_amount DECIMAL(15, 2) DEFAULT 0,
+  deadline DATE,
+  is_completed BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

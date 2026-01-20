@@ -3,24 +3,28 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
 
-if (!process.env.DATABASE_URL) {
-  console.error('❌ Error: DATABASE_URL is not defined. Please check your .env file.');
+const connectionString = process.argv[2] || process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error('❌ Error: DATABASE_URL is not defined in .env and no connection string provided.');
   process.exit(1);
 }
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: connectionString,
   ssl: { rejectUnauthorized: false } // Required for Render external connections
 });
 
 async function resetDatabase() {
   try {
-    console.log('⚠️  WARNING: This will wipe the database defined in DATABASE_URL.');
-    console.log('Target:', process.env.DATABASE_URL.split('@')[1]); // Log host only for safety
+    console.log('⚠️  WARNING: This will wipe the target database.');
+    const host = connectionString.includes('@') ? connectionString.split('@')[1] : 'unknown host';
+    console.log('Target:', host); // Log host only for safety
 
     // 1. Drop and Recreate Schema
     console.log('🗑️  Dropping public schema...');
     await pool.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
+    await pool.query('GRANT ALL ON SCHEMA public TO public;');
 
     // 2. Read SQL Files
     const rootDir = path.resolve(__dirname, '../sql');
@@ -39,13 +43,14 @@ async function resetDatabase() {
         const sql = fs.readFileSync(filePath, 'utf8');
         await pool.query(sql);
       } else {
-        throw new Error(`Schema file not found: ${filePath}`);
+        console.error(`❌ FATAL: Schema file not found: ${file}. Halting.`);
+        throw new Error(`Schema file not found: ${file}`);
       }
     }
 
     console.log('✅ Database reset and initialized successfully.');
   } catch (error) {
-    console.error('❌ Reset failed:', error);
+    console.error('❌ Database reset failed:', error.message);
   } finally {
     await pool.end();
   }
