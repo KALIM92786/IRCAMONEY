@@ -19,7 +19,20 @@ class RoboForexService {
     try {
       // Adjust endpoint based on actual API docs
       const response = await this.api.get(`/api/v1/accounts/${accountId}`);
-      return response.data;
+      
+      // Normalize data structure from { code: 'ok', data: { margin: { ... } } }
+      if (response.data && response.data.data && response.data.data.margin) {
+        const m = response.data.data.margin;
+        return {
+          id: accountId,
+          balance: m.balance,
+          equity: m.equity,
+          margin: m.margin,
+          freeMargin: m.free_margin,
+          marginLevel: m.margin_level || (m.margin > 0 ? (m.equity / m.margin) * 100 : 0)
+        };
+      }
+      return null;
     } catch (error) {
       console.error('RoboForex API Error (Account):', error.message);
       // Return null or throw depending on desired resilience
@@ -30,7 +43,10 @@ class RoboForexService {
   async getOrders(accountId = this.accountId) {
     try {
       const response = await this.api.get(`/api/v1/accounts/${accountId}/orders`);
-      return response.data;
+      if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      return [];
     } catch (error) {
       console.error('RoboForex API Error (Orders):', error.message);
       return [];
@@ -41,7 +57,10 @@ class RoboForexService {
     try {
       // Fetch last 50 deals or time-based
       const response = await this.api.get(`/api/v1/accounts/${accountId}/deals?limit=50`);
-      return response.data;
+      if (response.data && Array.isArray(response.data.data)) {
+        return response.data.data;
+      }
+      return [];
     } catch (error) {
       console.error('RoboForex API Error (Deals):', error.message);
       return [];
@@ -51,7 +70,10 @@ class RoboForexService {
   async getQuote(ticker = 'XAUUSD', accountId = this.accountId) {
     try {
       const response = await this.api.get(`/api/v1/accounts/${accountId}/instruments/${ticker}/quote`);
-      return response.data;
+      if (response.data && response.data.data) {
+        return response.data.data;
+      }
+      return null;
     } catch (error) {
       console.error(`RoboForex API Error (Quote ${ticker}):`, error.message);
       return null;
