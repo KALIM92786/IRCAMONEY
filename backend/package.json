@@ -7,6 +7,8 @@
     "dev": "nodemon server.js",
     "seed": "node scripts/seed.js",
     "db:reset": "node scripts/reset_db.js",
+    "db:reset-render": "node scripts/reset-render-db.js",
+    "db:init-render": "node scripts/init-render-db.js",
     "migrate": "node scripts/run_migration.js",
     "verify": "node scripts/verify_setup.js"
   },

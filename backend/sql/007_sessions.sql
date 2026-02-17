@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS user_sessions (
-  id SERIAL PRIMARY KEY,
-  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   token_hash VARCHAR(255) NOT NULL,
   ip_address VARCHAR(45),
   user_agent TEXT,

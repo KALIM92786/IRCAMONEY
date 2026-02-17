@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS accounts (
     equity DECIMAL(15, 2) NOT NULL DEFAULT 0,
     margin DECIMAL(15, 2) NOT NULL DEFAULT 0,
     free_margin DECIMAL(15, 2) NOT NULL DEFAULT 0,
+    margin_level DECIMAL(10, 2) DEFAULT 0,
     currency VARCHAR(10) DEFAULT 'USD',
     leverage INTEGER DEFAULT 100,
     type VARCHAR(50),
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS orders (
     account_id VARCHAR(50) REFERENCES accounts(id),
     symbol VARCHAR(20) NOT NULL,
     type VARCHAR(20) NOT NULL, -- BUY/SELL
+    side VARCHAR(20), -- Alias for type
     volume DECIMAL(10, 2) NOT NULL,
     open_price DECIMAL(15, 5) NOT NULL,
     current_price DECIMAL(15, 5),
@@ -56,9 +58,11 @@ CREATE TABLE IF NOT EXISTS deals (
     account_id VARCHAR(50) REFERENCES accounts(id),
     symbol VARCHAR(20) NOT NULL,
     type VARCHAR(20) NOT NULL, -- BUY/SELL
+    side VARCHAR(20), -- Alias for type
     volume DECIMAL(10, 2) NOT NULL,
     open_price DECIMAL(15, 5),
     close_price DECIMAL(15, 5),
+    price DECIMAL(15, 5), -- Alias for close_price
     close_time TIMESTAMP WITH TIME ZONE,
     profit DECIMAL(15, 2) NOT NULL,
     commission DECIMAL(10, 2) DEFAULT 0,

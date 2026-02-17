@@ -1,6 +1,9 @@
 const db = require('../config/database');
 const roboForex = require('./robforex');
 
+// Load environment variables
+require('dotenv').config({ path: require('path').join(__dirname, '../../.env') });
+
 class SyncEngine {
   constructor(io) {
     this.io = io;
