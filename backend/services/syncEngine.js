@@ -96,48 +96,72 @@ class SyncEngine {
     // Basic implementation: Upsert orders
     // In production, you might want to handle deletions/closures more robustly
     for (const order of orders) {
-      const query = `
-        INSERT INTO orders (id, account_id, symbol, side, volume, open_price, current_price, profit, open_time)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        ON CONFLICT (id) DO UPDATE SET
-          current_price = EXCLUDED.current_price,
-          profit = EXCLUDED.profit,
-          updated_at = NOW()
-      `;
-      const values = [
-        order.id,
-        process.env.ROBOFOREX_ACCOUNT_ID,
-        order.symbol,
-        order.side,
-        order.volume,
-        order.openPrice,
-        order.currentPrice,
-        order.profit,
-        new Date(order.openTime)
-      ];
-      await db.query(query, values);
+      try {
+        const query = `
+          INSERT INTO orders (id, account_id, symbol, side, volume, open_price, current_price, profit, open_time)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ON CONFLICT (id) DO UPDATE SET
+            current_price = EXCLUDED.current_price,
+            profit = EXCLUDED.profit,
+            updated_at = NOW()
+        `;
+        
+        // Safely parse timestamp
+        let openTime = null;
+        if (order.openTime) {
+          const parsed = new Date(order.openTime);
+          openTime = isNaN(parsed.getTime()) ? null : parsed;
+        }
+        
+        const values = [
+          order.id,
+          process.env.ROBOFOREX_ACCOUNT_ID,
+          order.symbol,
+          order.side,
+          order.volume,
+          order.openPrice,
+          order.currentPrice,
+          order.profit,
+          openTime
+        ];
+        await db.query(query, values);
+      } catch (error) {
+        console.error(`Failed to update order ${order.id}:`, error.message);
+      }
     }
   }
 
   async updateDeals(deals) {
     for (const deal of deals) {
-      const query = `
-        INSERT INTO deals (id, order_id, account_id, symbol, side, volume, price, profit, close_time)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-        ON CONFLICT (id) DO NOTHING
-      `;
-      const values = [
-        deal.id,
-        deal.orderId,
-        process.env.ROBOFOREX_ACCOUNT_ID,
-        deal.symbol,
-        deal.side,
-        deal.volume,
-        deal.price,
-        deal.profit,
-        new Date(deal.closeTime)
-      ];
-      await db.query(query, values);
+      try {
+        const query = `
+          INSERT INTO deals (id, order_id, account_id, symbol, side, volume, price, profit, close_time)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+          ON CONFLICT (id) DO NOTHING
+        `;
+        
+        // Safely parse timestamp
+        let closeTime = null;
+        if (deal.closeTime) {
+          const parsed = new Date(deal.closeTime);
+          closeTime = isNaN(parsed.getTime()) ? null : parsed;
+        }
+        
+        const values = [
+          deal.id,
+          deal.orderId,
+          process.env.ROBOFOREX_ACCOUNT_ID,
+          deal.symbol,
+          deal.side,
+          deal.volume,
+          deal.price,
+          deal.profit,
+          closeTime
+        ];
+        await db.query(query, values);
+      } catch (error) {
+        console.error(`Failed to update deal ${deal.id}:`, error.message);
+      }
     }
   }
 
