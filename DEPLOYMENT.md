@@ -87,7 +87,7 @@ If you prefer manual deployment instead of Blueprint:
    ```
    NODE_ENV=production
    PORT=3000
-   DATABASE_URL=[Your Internal Database URL]
+   DATABASE_URL=postgresql://ircamoneydb:[PASSWORD]@dpg-d68tsibnv86c73el0530-a/ircamoneydb_5qn4
    JWT_SECRET=[Generate a secure string]
    ROBOFOREX_API_URL=https://api.stockstrader.com
    ROBOFOREX_ACCOUNT_ID=your_account_id
@@ -137,7 +137,7 @@ After database is created, you need to initialize it:
 3. Note the connection string
 4. Connect locally:
    ```bash
-   psql "postgresql://user:pass@host:port/database" < backend/sql/schema.sql
+   PGPASSWORD=[PASSWORD] psql -h dpg-d68tsibnv86c73el0530-a.oregon-postgres.render.com -U ircamoneydb ircamoneydb_5qn4 < backend/sql/schema.sql
    ```
 
 ### Option 2: Use Database Query Tool

@@ -55,6 +55,9 @@ ROBOFOREX_API_TOKEN=your_api_token
 ### Step 3: Initialize Database (1 minute)
 
 ```bash
+# Create database (if you skipped Step 1)
+node scripts/create_db.js
+
 # Reset database with schema
 npm run db:reset
 

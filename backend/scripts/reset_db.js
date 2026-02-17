@@ -18,6 +18,13 @@ if (!connectionString) {
   process.exit(1);
 }
 
+if (connectionString.includes('dpg-') && !connectionString.includes('.render.com')) {
+  console.error('❌ DETECTED INTERNAL URL: You are using a Render Internal URL locally.');
+  console.error('   Please update your .env file with the External Database URL.');
+  console.error('   Format: postgresql://user:pass@hostname.region.render.com/dbname');
+  process.exit(1);
+}
+
 const pool = new Pool({
   connectionString: connectionString,
   ssl: { rejectUnauthorized: false } // Required for Render external connections
